@@ -69,10 +69,14 @@ describe Mash do
     @mash.details.email.should == "michael@intridea.com"
   end
   
-  it "should convert hash assignments into mashes" do
-    @mash.details = {:email => 'randy@asf.com', :address => {:state => 'TX'} }
-    @mash.details.email.should == 'randy@asf.com'
-    @mash.details.address.state.should == 'TX'
+  it "should handle id correctly" do
+    @mash.id = 100
+    @mash.id.should == 100
+  end
+
+  it "should handle a buried id correctly" do
+    @mash.top = { :id => 100 }
+    @mash.top.id.should == 100
   end
   
   context "#initialize" do
@@ -93,25 +97,6 @@ describe Mash do
       converted = Mash.new({:a => [{:b => 12}, 23]})
       converted.a.first.b.should == 12
       converted.a.last.should == 23
-    end
-    
-    it "should convert an existing Mash into a Mash" do
-      initial = Mash.new(:name => 'randy', :address => {:state => 'TX'})
-      copy = Mash.new(initial)
-      initial.name.should == copy.name      
-      initial.object_id.should_not == copy.object_id
-      copy.address.state.should == 'TX'
-      copy.address.state = 'MI'
-      initial.address.state.should == 'TX'
-      copy.address.object_id.should_not == initial.address.object_id
-    end
-    
-    it "should accept a default block" do
-      initial = Mash.new { |h,i| h[i] = []}
-      initial.default_proc.should_not be_nil
-      initial.default.should be_nil
-      initial.test.should == []
-      initial.test?.should be_true
     end
   end
 end
@@ -134,6 +119,18 @@ describe Hash do
     stringified_hash = hash.stringify_keys
     hash.should == {:a => "hey", 123 => "bob"}
     stringified_hash.should == {"a" => "hey", "123" => "bob"}
+  end
+
+  it "should handle id properly" do
+    mash = {:id => 100}.to_mash
+    mash.is_a?(Mash).should be_true
+    mash.id.should == 100
+  end
+
+  it "should handle buried id properly" do
+    mash = {:top => {:id => 100}}.to_mash
+    mash.is_a?(Mash).should be_true
+    mash.top.id.should == 100
   end
   
 end
